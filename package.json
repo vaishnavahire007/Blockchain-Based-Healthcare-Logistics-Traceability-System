@@ -1,0 +1,17 @@
+{
+  "name": "blockchain-healthcare-logistics",
+  "version": "1.0.0",
+  "description": "Blockchain-Based Healthcare Logistics Traceability System",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd backend && node server.js",
+    "client": "cd frontend && npm run dev"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
