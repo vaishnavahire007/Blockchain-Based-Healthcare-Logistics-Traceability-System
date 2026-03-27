@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Html5QrcodeScanner, Html5Qrcode, Html5QrcodeScanType } from 'html5-qrcode';
+import { extractBatchIdFromQR } from '../utils/qrUtils';
 
 export default function ScanQR() {
   const [scanResult, setScanResult] = useState(null);
@@ -10,20 +11,19 @@ export default function ScanQR() {
   const [mode, setMode] = useState('selection'); // 'selection' | 'camera' | 'upload'
   const navigate = useNavigate();
 
-  const handleScanSuccess = (decodedText) => {
+  const handleScanSuccess = (decodedText, scannerInstance = null) => {
     setScanResult(decodedText);
-    try {
-      const url = new URL(decodedText);
-      if (url.pathname.startsWith('/track/')) {
-        const batchId = url.pathname.replace('/track/', '');
-        if (batchId) {
-          navigate(`/track/${batchId}`);
-        }
-      } else {
-        setScanError("Invalid Protocol: QR Code does not encapsulate a known Supply Chain URL.");
+    
+    // Leverage the new centralized extraction module
+    const batchId = extractBatchIdFromQR(decodedText);
+    
+    if (batchId) {
+      if (scannerInstance) {
+         scannerInstance.clear().catch(e => console.error("Failed to halt camera.", e));
       }
-    } catch (err) {
-      setScanError("Unrecognized Payload: Code is not formatted safely.");
+      navigate(`/track/${batchId}`);
+    } else {
+      setScanError("Invalid QR Code: Payload does not contain a verifiable tracking ID.");
     }
   };
 
@@ -36,8 +36,9 @@ export default function ScanQR() {
       const html5QrCode = new Html5Qrcode("file-qr-reader");
       // true specifies we want to execute a robust rescan fallback algorithm if it fails initially
       const decodedText = await html5QrCode.scanFile(file, true);
-      handleScanSuccess(decodedText);
+      handleScanSuccess(decodedText, null);
     } catch (err) {
+      console.error(err);
       setScanError("Invalid or unreadable QR image");
     }
   };
@@ -56,10 +57,7 @@ export default function ScanQR() {
       );
       
       scanner.render(
-        (text) => {
-          scanner.clear();
-          handleScanSuccess(text);
-        }, 
+        (text) => handleScanSuccess(text, scanner), 
         () => {} // explicitly bury camera query loop logs
       );
     }
@@ -92,7 +90,7 @@ export default function ScanQR() {
           </div>
         )}
         
-        {scanResult ? (
+        {scanResult && !scanError ? (
           <div style={{ textAlign: 'center', margin: '2rem 0' }}>
             <p style={{ color: '#10b981', fontWeight: 'bold', fontSize: '1.25rem' }}>Match Successful! Intercepting origin tracker...</p>
           </div>

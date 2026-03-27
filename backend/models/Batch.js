@@ -27,8 +27,12 @@ const batchSchema = new mongoose.Schema({
   },
   temperatureThreshold: {
     type: Number,
-    required: [true, 'Please provide the critical temperature threshold (°C)']
+    required: [true, 'Please add a safe temperature threshold']
   },
+  temperatureLogs: [{
+    value: Number,
+    timestamp: Date
+  }],
   currentOwner: {
     type: String,
     enum: ['manufacturer', 'distributor', 'pharmacy'],
@@ -39,7 +43,18 @@ const batchSchema = new mongoose.Schema({
     enum: ['created', 'in-transit', 'delivered'],
     default: 'created'
   },
+  isValid: {
+    type: Boolean,
+    default: true
+  },
+  isSafe: {
+    type: Boolean,
+    default: true
+  },
   qrCode: {
+    type: String
+  },
+  blockchainHash: {
     type: String
   },
   journeyLogs: [{

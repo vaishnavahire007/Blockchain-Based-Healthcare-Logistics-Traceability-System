@@ -9,6 +9,7 @@ const PORT = process.env.PORT || 5000;
 // Route files
 const authRoutes = require("./routes/authRoutes");
 const batchRoutes = require("./routes/batchRoutes");
+const startTemperatureSimulation = require('./utils/simulator');
 
 // Middleware
 app.use(cors());
@@ -22,6 +23,9 @@ app.get("/api/test", (req, res) => {
 // Mount routers
 app.use('/api/auth', authRoutes);
 app.use('/api/batch', batchRoutes);
+
+// Spark Native Background IoT Daemon
+startTemperatureSimulation();
 
 // Database connection
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/blockchain_logistics";

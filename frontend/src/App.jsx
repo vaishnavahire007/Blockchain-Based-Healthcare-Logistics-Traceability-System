@@ -7,6 +7,7 @@ import DistributorDashboard from './pages/DistributorDashboard';
 import PharmacyDashboard from './pages/PharmacyDashboard';
 import UserDashboard from './pages/UserDashboard';
 import TrackBatch from './pages/TrackBatch';
+import TrackInput from './pages/TrackInput';
 import ScanQR from './pages/ScanQR';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -59,6 +60,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/track" element={<TrackInput />} />
           <Route path="/track/:batchId" element={<TrackBatch />} />
           <Route path="/scan" element={<ScanQR />} />
           

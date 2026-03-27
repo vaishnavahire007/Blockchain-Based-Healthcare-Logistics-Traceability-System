@@ -3,33 +3,116 @@ import { useNavigate } from 'react-router-dom';
 
 export default function PharmacyDashboard() {
   const [role, setRole] = useState('Pharmacy');
+  const [message, setMessage] = useState({ type: '', text: '' });
+  const [batches, setBatches] = useState([]);
   const navigate = useNavigate();
+
+  const fetchIncomingBatches = async () => {
+    try {
+      const res = await fetch('/api/batch/incoming', {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      const data = await res.json();
+      if (res.ok) setBatches(data.data);
+    } catch (err) {
+      console.error("Failed to fetch batches", err);
+    }
+  };
 
   useEffect(() => {
     const savedRole = localStorage.getItem('userRole');
     if(savedRole) setRole(savedRole.charAt(0).toUpperCase() + savedRole.slice(1));
+    fetchIncomingBatches();
   }, []);
 
+  const processBatchAcceptance = async (batchId, navigateToTrack = false) => {
+    try {
+      const res = await fetch(`/api/batch/update-status/${batchId}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      const data = await res.json();
+      
+      if (res.ok) {
+        setMessage({ type: 'success', text: "Batch accepted successfully!" });
+        fetchIncomingBatches(); // Silently rebuild the active DOM table
+        
+        if (navigateToTrack) {
+          setTimeout(() => navigate(`/track/${batchId}`), 2000);
+        } else {
+          // Soft resets the notification after 4 seconds
+          setTimeout(() => setMessage({ type: '', text: '' }), 4000);
+        }
+      } else {
+        setMessage({ type: 'error', text: data.error || "Batch already accepted or request failed." });
+      }
+    } catch (err) {
+      setMessage({ type: 'error', text: "Network error connecting to blockchain logistics." });
+    }
+  };
+
   return (
-    <div className="dashboard-container">
+    <div className="dashboard-container" style={{ maxWidth: '1000px' }}>
       <div className="status-badge online" style={{marginBottom: '1rem'}}>
         Logged in as: {role}
       </div>
       <h2>Pharmacy Operations</h2>
       
-      <div className="dashboard-grid" style={{ gridTemplateColumns: '1fr', maxWidth: '600px', margin: '2rem auto' }}>
-        <div className="dashboard-card" style={{ textAlign: 'center', padding: '3rem 2rem' }}>
-          <h3 style={{ borderBottom: 'none' }}>Receive Final Shipment</h3>
-          <p style={{ color: '#64748b', margin: '1.5rem 0' }}>
-            To safely take ownership of a medication batch and finalize the journey as "Delivered", scan the Distributor's tracking QR Code natively.
+      {message.text && (
+        <div className={`message-alert ${message.type}`} style={{ margin: '1rem 0', textAlign: 'left' }}>
+          {message.text}
+        </div>
+      )}
+
+      <div className="dashboard-grid" style={{ gridTemplateColumns: '1fr', margin: '2rem 0', gap: '2rem' }}>
+        
+        {/* Dynamic Network Virtual Array Table Queue */}
+        <div className="dashboard-card" style={{ padding: '2rem' }}>
+          <h3 style={{ borderBottom: 'none' }}>Incoming Network Manifests</h3>
+          <p style={{ color: '#64748b', marginBottom: '1.5rem' }}>
+            The following payloads shipped from a Distributor have arrived in your region. Cross verify stock visually and accept payload. 
           </p>
-          <button 
-            className="primary-btn" 
-            style={{ fontSize: '1.25rem', padding: '1rem 2rem', marginTop: '1rem', width: 'auto' }}
-            onClick={() => navigate('/scan')}
-          >
-            Scan Delivery QR
-          </button>
+          
+          {batches.length === 0 ? (
+            <div style={{ padding: '3rem', textAlign: 'center', background: '#f8fafc', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>
+              <p style={{ color: '#94a3b8', margin: 0, fontSize: '1.1rem' }}>No manifests awaiting transfer at your location.</p>
+            </div>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '600px' }}>
+                <thead>
+                  <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '2px solid #e2e8f0' }}>
+                    <th style={{ padding: '1rem' }}>Batch UUID</th>
+                    <th style={{ padding: '1rem' }}>Medicine</th>
+                    <th style={{ padding: '1rem' }}>Expiry Date</th>
+                    <th style={{ padding: '1rem', textAlign: 'right' }}>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {batches.map(batch => (
+                    <tr key={batch.batchId} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                      <td style={{ padding: '1rem', fontFamily: 'monospace', fontSize: '0.95rem', color: '#64748b' }}>
+                        {batch.batchId.split('-')[0]}...
+                      </td>
+                      <td style={{ padding: '1rem', fontWeight: 'bold' }}>{batch.medicineName}</td>
+                      <td style={{ padding: '1rem' }}>{new Date(batch.expiryDate).toLocaleDateString()}</td>
+                      <td style={{ padding: '1rem', textAlign: 'right' }}>
+                        <button 
+                          className="primary-btn" 
+                          style={{ padding: '0.6rem 1.25rem', fontSize: '0.95rem', width: 'auto' }}
+                          onClick={() => processBatchAcceptance(batch.batchId, false)}
+                        >
+                          Accept Batch
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
     </div>
