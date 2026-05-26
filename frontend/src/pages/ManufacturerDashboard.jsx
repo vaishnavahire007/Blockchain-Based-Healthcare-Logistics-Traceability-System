@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
+import QRModal from '../components/QRModal';
+import API_BASE from '../utils/apiBase';
 
 export default function ManufacturerDashboard() {
   const [role, setRole] = useState('Manufacturer');
   const [batches, setBatches] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [selectedQR, setSelectedQR] = useState(null); // { qrCode, medicineName, batchId }
   
   const [formData, setFormData] = useState({
     medicineName: '',
@@ -21,7 +24,7 @@ export default function ManufacturerDashboard() {
 
   const fetchBatches = async () => {
     try {
-      const res = await fetch('/api/batch/my-batches', {
+      const res = await fetch(`${API_BASE}/api/batch/my-batches`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -45,7 +48,7 @@ export default function ManufacturerDashboard() {
     setMessage({ type: '', text: '' });
 
     try {
-      const res = await fetch('/api/batch/create', {
+      const res = await fetch(`${API_BASE}/api/batch/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -130,7 +133,15 @@ export default function ManufacturerDashboard() {
                     <td>{new Date(batch.expiryDate).toLocaleDateString()}</td>
                     <td>
                       {batch.qrCode ? (
-                        <img src={batch.qrCode} alt="QR Code" width="64" height="64" style={{ borderRadius: '4px', border: '1px solid #e2e8f0' }} />
+                        <img
+                          src={batch.qrCode}
+                          alt="QR Code"
+                          width="64"
+                          height="64"
+                          className="qr-thumbnail"
+                          title="Click to enlarge"
+                          onClick={() => setSelectedQR({ qrCode: batch.qrCode, medicineName: batch.medicineName, batchId: batch.batchId })}
+                        />
                       ) : 'N/A'}
                     </td>
                   </tr>
@@ -140,6 +151,14 @@ export default function ManufacturerDashboard() {
           )}
         </div>
       </div>
+      {selectedQR && (
+        <QRModal
+          qrCode={selectedQR.qrCode}
+          medicineName={selectedQR.medicineName}
+          batchId={selectedQR.batchId}
+          onClose={() => setSelectedQR(null)}
+        />
+      )}
     </div>
   );
 }

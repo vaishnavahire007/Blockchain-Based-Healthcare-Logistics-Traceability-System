@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import API_BASE from '../utils/apiBase';
 
 export default function DistributorDashboard() {
   const [role, setRole] = useState('Distributor');
@@ -9,7 +10,7 @@ export default function DistributorDashboard() {
 
   const fetchIncomingBatches = async () => {
     try {
-      const res = await fetch('/api/batch/incoming', {
+      const res = await fetch(`${API_BASE}/api/batch/incoming`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await res.json();
@@ -27,7 +28,7 @@ export default function DistributorDashboard() {
 
   const processBatchAcceptance = async (batchId, navigateToTrack = false) => {
     try {
-      const res = await fetch(`/api/batch/update-status/${batchId}`, {
+      const res = await fetch(`${API_BASE}/api/batch/update-status/${batchId}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`

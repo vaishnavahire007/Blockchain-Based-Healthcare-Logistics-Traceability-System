@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import API_BASE from '../utils/apiBase';
 
 export default function TrackBatch() {
   const { batchId } = useParams();
@@ -18,7 +19,7 @@ export default function TrackBatch() {
   useEffect(() => {
     const fetchBatch = async () => {
       try {
-        const res = await fetch(`/api/batch/${batchId}`);
+        const res = await fetch(`${API_BASE}/api/batch/${batchId}`);
         const data = await res.json();
         
         if (data.success) {
@@ -26,7 +27,7 @@ export default function TrackBatch() {
           
           // Trigger Cryptographic Hash Verification dynamically
           try {
-            const vRes = await fetch(`/api/batch/verify/${batchId}`);
+            const vRes = await fetch(`${API_BASE}/api/batch/verify/${batchId}`);
             const vData = await vRes.json();
             setVerificationStatus(vData);
           } catch (vErr) {

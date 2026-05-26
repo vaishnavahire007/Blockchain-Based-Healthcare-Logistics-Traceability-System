@@ -368,3 +368,190 @@ body {
   border: 2px solid var(--primary-color);
   border-radius: 50%;
 }
+
+/* ── Clickable QR thumbnail ─────────────────────────────────────────── */
+.qr-thumbnail {
+  width: 64px;
+  height: 64px;
+  border-radius: 6px;
+  border: 2px solid #e2e8f0;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  display: block;
+}
+
+.qr-thumbnail:hover {
+  transform: scale(1.12);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.25);
+  border-color: var(--primary-color);
+}
+
+/* ── QR Modal overlay ───────────────────────────────────────────────── */
+.qr-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: qrFadeIn 0.2s ease;
+}
+
+@keyframes qrFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── QR Modal card ──────────────────────────────────────────────────── */
+.qr-modal-card {
+  background: #ffffff;
+  border-radius: 1.25rem;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  animation: qrSlideUp 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes qrSlideUp {
+  from { transform: translateY(40px) scale(0.95); opacity: 0; }
+  to   { transform: translateY(0)    scale(1);    opacity: 1; }
+}
+
+/* ── Modal header ───────────────────────────────────────────────────── */
+.qr-modal-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.qr-modal-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-color);
+  margin: 0;
+}
+
+.qr-modal-subtitle {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0.2rem 0 0;
+}
+
+.qr-modal-close {
+  background: #f1f5f9;
+  border: none;
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.qr-modal-close:hover {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+/* ── QR image wrapper with corner brackets ──────────────────────────── */
+.qr-modal-image-wrap {
+  position: relative;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.qr-modal-image {
+  display: block;
+  width: 240px;
+  height: 240px;
+  border-radius: 4px;
+}
+
+/* Corner bracket decorations */
+.qr-modal-scanner-corner {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-color: var(--primary-color);
+  border-style: solid;
+}
+.qr-modal-scanner-corner.tl { top: 8px;  left: 8px;   border-width: 3px 0 0 3px; border-radius: 4px 0 0 0; }
+.qr-modal-scanner-corner.tr { top: 8px;  right: 8px;  border-width: 3px 3px 0 0; border-radius: 0 4px 0 0; }
+.qr-modal-scanner-corner.bl { bottom: 8px; left: 8px;  border-width: 0 0 3px 3px; border-radius: 0 0 0 4px; }
+.qr-modal-scanner-corner.br { bottom: 8px; right: 8px; border-width: 0 3px 3px 0; border-radius: 0 0 4px 0; }
+
+/* ── Hint text ──────────────────────────────────────────────────────── */
+.qr-modal-hint {
+  font-size: 0.82rem;
+  color: #64748b;
+  text-align: center;
+  margin: 0;
+}
+
+/* ── Action buttons ─────────────────────────────────────────────────── */
+.qr-modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.qr-modal-download-btn {
+  flex: 1;
+  background: var(--primary-color);
+  color: #fff;
+  border: none;
+  border-radius: 0.6rem;
+  padding: 0.7rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  font-family: inherit;
+}
+
+.qr-modal-download-btn:hover {
+  background: var(--secondary-color);
+  transform: translateY(-1px);
+}
+
+.qr-modal-cancel-btn {
+  flex: 0 0 auto;
+  background: #f1f5f9;
+  color: #475569;
+  border: none;
+  border-radius: 0.6rem;
+  padding: 0.7rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-family: inherit;
+}
+
+.qr-modal-cancel-btn:hover {
+  background: #e2e8f0;
+}
+
+/* ── Batch ID footer ────────────────────────────────────────────────── */
+.qr-modal-batch-id {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  text-align: center;
+  margin: 0;
+}

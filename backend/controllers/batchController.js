@@ -14,8 +14,11 @@ exports.createBatch = async (req, res) => {
     }
 
     const batchId = crypto.randomUUID();
-    const trackerUrl = `http://localhost:5173/track/${batchId}`;
-    const qrCodeBase64 = await QRCode.toDataURL(trackerUrl);
+    // BACKEND_URL is set in Render's environment variables (e.g. https://your-app.onrender.com)
+    // Falls back to localhost for local development.
+    const baseUrl = process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5000}`;
+    const trackerUrl = `${baseUrl}/track/${batchId}`;
+    const qrCodeBase64 = await QRCode.toDataURL(trackerUrl, { width: 300, margin: 2 });
 
     // Cryptographically serialize immutable ledger properties into an impenetrable SHA256 string
     const hashPayload = JSON.stringify({

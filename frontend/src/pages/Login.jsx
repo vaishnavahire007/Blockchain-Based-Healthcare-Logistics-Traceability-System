@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import API_BASE from '../utils/apiBase';
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -21,7 +22,7 @@ export default function Login() {
     setError('');
 
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
