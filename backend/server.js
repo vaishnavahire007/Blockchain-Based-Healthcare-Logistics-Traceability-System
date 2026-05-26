@@ -176,7 +176,7 @@ function renderTrackPage(batch, batchId, verified = null, serverError = null) {
 // React Router fallback — must come AFTER /api and /track routes.
 // Sends index.html for any other GET (e.g. /login, /manufacturer-dashboard).
 // ─────────────────────────────────────────────────────────────────────────────
-app.get('/*', (req, res) => {
+app.get('/{*splat}', (req, res) => {
   res.sendFile(path.join(frontendDist, 'index.html'));
 });
 

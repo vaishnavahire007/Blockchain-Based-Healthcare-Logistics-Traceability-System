@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import QRModal from '../components/QRModal';
+import BatchLogModal from '../components/BatchLogModal';
 import API_BASE from '../utils/apiBase';
 
 export default function ManufacturerDashboard() {
@@ -7,8 +8,9 @@ export default function ManufacturerDashboard() {
   const [batches, setBatches] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
-  const [selectedQR, setSelectedQR] = useState(null); // { qrCode, medicineName, batchId }
-  
+  const [selectedQR, setSelectedQR] = useState(null);
+  const [selectedLog, setSelectedLog] = useState(null); // batch object for log modal
+
   const [formData, setFormData] = useState({
     medicineName: '',
     manufactureDate: '',
@@ -65,7 +67,7 @@ export default function ManufacturerDashboard() {
 
       setMessage({ type: 'success', text: 'Batch created successfully!' });
       setFormData({ medicineName: '', manufactureDate: '', expiryDate: '', temperatureThreshold: '' });
-      fetchBatches(); // Refresh list
+      fetchBatches();
     } catch (err) {
       setMessage({ type: 'error', text: err.message });
     } finally {
@@ -79,7 +81,7 @@ export default function ManufacturerDashboard() {
         Logged in as: {role}
       </div>
       <h2>Manufacturer Dashboard</h2>
-      
+
       <div className="dashboard-grid">
         <div className="dashboard-card">
           <h3>Create New Medicine Batch</h3>
@@ -122,7 +124,9 @@ export default function ManufacturerDashboard() {
                   <th>Batch ID</th>
                   <th>Medicine Name</th>
                   <th>Expiry Date</th>
+                  <th>Status</th>
                   <th>QR Code</th>
+                  <th>Log</th>
                 </tr>
               </thead>
               <tbody>
@@ -131,6 +135,20 @@ export default function ManufacturerDashboard() {
                     <td className="code-font">{batch.batchId.substring(0, 8)}...</td>
                     <td><strong>{batch.medicineName}</strong></td>
                     <td>{new Date(batch.expiryDate).toLocaleDateString()}</td>
+                    <td>
+                      <span style={{
+                        display: 'inline-block',
+                        padding: '2px 10px',
+                        borderRadius: '20px',
+                        fontSize: '0.78rem',
+                        fontWeight: 700,
+                        textTransform: 'capitalize',
+                        background: batch.status === 'created' ? '#eff6ff' : batch.status === 'in-transit' ? '#fffbeb' : '#f0fdf4',
+                        color: batch.status === 'created' ? '#1d4ed8' : batch.status === 'in-transit' ? '#b45309' : '#15803d',
+                      }}>
+                        {batch.status === 'created' ? '🏭' : batch.status === 'in-transit' ? '🚚' : '✅'} {batch.status}
+                      </span>
+                    </td>
                     <td>
                       {batch.qrCode ? (
                         <img
@@ -144,6 +162,28 @@ export default function ManufacturerDashboard() {
                         />
                       ) : 'N/A'}
                     </td>
+                    <td>
+                      <button
+                        onClick={() => setSelectedLog(batch)}
+                        style={{
+                          background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: '8px',
+                          padding: '0.4rem 0.85rem',
+                          fontSize: '0.78rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          whiteSpace: 'nowrap',
+                          transition: 'opacity 0.15s',
+                        }}
+                        onMouseOver={e => e.currentTarget.style.opacity = '0.85'}
+                        onMouseOut={e => e.currentTarget.style.opacity = '1'}
+                        title="View journey log"
+                      >
+                        📋 View Log
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -151,12 +191,20 @@ export default function ManufacturerDashboard() {
           )}
         </div>
       </div>
+
       {selectedQR && (
         <QRModal
           qrCode={selectedQR.qrCode}
           medicineName={selectedQR.medicineName}
           batchId={selectedQR.batchId}
           onClose={() => setSelectedQR(null)}
+        />
+      )}
+
+      {selectedLog && (
+        <BatchLogModal
+          batch={selectedLog}
+          onClose={() => setSelectedLog(null)}
         />
       )}
     </div>

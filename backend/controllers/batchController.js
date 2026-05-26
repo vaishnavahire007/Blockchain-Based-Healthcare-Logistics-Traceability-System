@@ -87,6 +87,26 @@ exports.getMyBatches = async (req, res) => {
   }
 };
 
+// @desc    Get all batches accepted by the logged-in distributor or pharmacy
+// @route   GET /api/batch/accepted
+// @access  Private (Distributor/Pharmacy)
+exports.getAcceptedBatches = async (req, res) => {
+  try {
+    const { role } = req.user;
+
+    // Find all batches where this role has an 'accepted' log entry
+    const batches = await Batch.find({
+      'journeyLogs': { $elemMatch: { role: role, action: 'accepted' } }
+    })
+      .populate('manufacturerId', 'name email')
+      .sort({ updatedAt: -1 });
+
+    res.status(200).json({ success: true, count: batches.length, data: batches });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
 // @desc    Update batch tracking status and handovers
 // @route   POST /api/batch/update-status/:batchId
 // @access  Private (Distributor/Pharmacy)

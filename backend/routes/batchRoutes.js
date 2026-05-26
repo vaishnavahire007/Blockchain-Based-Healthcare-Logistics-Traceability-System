@@ -1,5 +1,5 @@
 const express = require('express');
-const { createBatch, getBatchById, getMyBatches, updateBatchStatus, getIncomingBatches, addTemperatureLog, verifyBatchHash, tamperBatchData } = require('../controllers/batchController');
+const { createBatch, getBatchById, getMyBatches, getAcceptedBatches, updateBatchStatus, getIncomingBatches, addTemperatureLog, verifyBatchHash, tamperBatchData } = require('../controllers/batchController');
 const { protect } = require('../middleware/authMiddleware');
 const { authorize } = require('../middleware/roleMiddleware');
 
@@ -12,6 +12,7 @@ router.get('/my-batches', protect, authorize('manufacturer'), getMyBatches);
 // Supply Chain Routes
 router.post('/update-status/:batchId', protect, authorize('distributor', 'pharmacy'), updateBatchStatus);
 router.get('/incoming', protect, authorize('distributor', 'pharmacy'), getIncomingBatches);
+router.get('/accepted', protect, authorize('distributor', 'pharmacy'), getAcceptedBatches);
 
 // IoT Sensor Webhook (Simulated)
 router.post('/add-temperature/:batchId', addTemperatureLog);
