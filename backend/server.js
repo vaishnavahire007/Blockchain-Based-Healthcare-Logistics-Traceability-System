@@ -104,6 +104,102 @@ function renderTrackPage(batch, batchId, verified = null, serverError = null) {
         </div>`).join('')
     : '<p style="color:#64748b">No journey logs yet.</p>';
 
+  // ── Temperature Section ────────────────────────────────────────────────────
+  let tempSectionHtml = '';
+  if (batch && batch.temperatureLogs && batch.temperatureLogs.length > 0) {
+    const logs      = batch.temperatureLogs.slice().reverse(); // newest first for the table
+    const logsAsc   = batch.temperatureLogs;                   // oldest first for the chart
+    const threshold = batch.temperatureThreshold;
+
+    const chartLabels = JSON.stringify(
+      logsAsc.map(l => new Date(l.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
+    );
+    const chartValues = JSON.stringify(logsAsc.map(l => l.value));
+    const anyExceeded = logsAsc.some(l => l.value > threshold);
+    const chartColor  = anyExceeded ? '#ef4444' : '#2563eb';
+
+    const tableRows = logs.map(l => {
+      const exceeded = l.value > threshold;
+      return `
+        <tr>
+          <td style="padding:0.65rem 0.75rem;font-weight:700;color:${exceeded ? '#ef4444' : '#16a34a'};">
+            ${exceeded ? '🔴' : '🟢'} ${l.value}°C
+          </td>
+          <td style="padding:0.65rem 0.75rem;color:#64748b;font-size:0.85rem;">
+            ${new Date(l.timestamp).toLocaleString(undefined, { year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit' })}
+          </td>
+        </tr>`;
+    }).join('');
+
+    tempSectionHtml = `
+    <div class="card">
+      <h3 style="margin-bottom:1.25rem;">🌡️ Temperature History</h3>
+      <div style="position:relative;height:220px;margin-bottom:1.25rem;">
+        <canvas id="tempChart"></canvas>
+      </div>
+      <div style="max-height:220px;overflow-y:auto;border-radius:10px;border:1px solid #e2e8f0;">
+        <table style="width:100%;border-collapse:collapse;">
+          <thead>
+            <tr style="background:#f1f5f9;position:sticky;top:0;">
+              <th style="padding:0.65rem 0.75rem;text-align:left;font-size:0.82rem;color:#475569;">Recorded Temperature</th>
+              <th style="padding:0.65rem 0.75rem;text-align:left;font-size:0.82rem;color:#475569;">Timestamp</th>
+            </tr>
+          </thead>
+          <tbody>${tableRows}</tbody>
+        </table>
+      </div>
+      <p style="margin-top:0.75rem;font-size:0.78rem;color:#94a3b8;text-align:right;">
+        Threshold: below ${threshold}°C &nbsp;•&nbsp; ${batch.temperatureLogs.length} readings
+      </p>
+    </div>
+    <script>
+      (function() {
+        var ctx = document.getElementById('tempChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: ${chartLabels},
+            datasets: [{
+              label: 'Temperature (°C)',
+              data: ${chartValues},
+              borderColor: '${chartColor}',
+              backgroundColor: '${chartColor}22',
+              borderWidth: 2,
+              pointRadius: 3,
+              pointBackgroundColor: '${chartColor}',
+              tension: 0.3,
+              fill: true,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function(ctx) { return ctx.parsed.y + '°C'; }
+                }
+              }
+            },
+            scales: {
+              x: { ticks: { maxTicksLimit: 8, font: { size: 10 } }, grid: { display: false } },
+              y: { ticks: { font: { size: 10 }, callback: v => v + '°C' },
+                   suggestedMin: 0,
+                   grid: { color: '#f1f5f9' } }
+            }
+          }
+        });
+      })();
+    </script>`;
+  } else if (batch) {
+    tempSectionHtml = `
+    <div class="card">
+      <h3 style="margin-bottom:0.75rem;">🌡️ Temperature History</h3>
+      <p style="color:#94a3b8;font-size:0.9rem;">No temperature readings recorded yet.</p>
+    </div>`;
+  }
+
   const batchHtml = batch ? `
     <div class="card">
       <h2 style="color:#2563eb;margin-bottom:0.25rem;">${batch.medicineName}</h2>
@@ -127,7 +223,8 @@ function renderTrackPage(batch, batchId, verified = null, serverError = null) {
     <div class="card">
       <h3 style="margin-bottom:1.25rem;">📦 Journey Timeline</h3>
       <div class="timeline">${journeyHtml}</div>
-    </div>` : errorHtml;
+    </div>
+    ${tempSectionHtml}` : errorHtml;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -136,6 +233,7 @@ function renderTrackPage(batch, batchId, verified = null, serverError = null) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="theme-color" content="#2563eb"/>
   <title>${batch ? batch.medicineName + ' — Batch Tracker' : 'Batch Not Found'}</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f4ff; color: #0f172a; min-height: 100vh; padding-bottom: 2rem; }
