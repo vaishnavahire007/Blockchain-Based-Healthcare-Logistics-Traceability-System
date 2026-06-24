@@ -213,9 +213,9 @@ exports.getIncomingBatches = async (req, res) => {
   }
 };
 
-// @desc    Simulate IoT temperature sensor logs natively
+// @desc    Record IoT temperature sensor reading
 // @route   POST /api/batch/add-temperature/:batchId
-// @access  Public (Simulating independent hardware device webhook ping)
+// @access  Public (hardware ESP32 device OR internal simulator)
 exports.addTemperatureLog = async (req, res) => {
   try {
     const batch = await Batch.findOne({ batchId: req.params.batchId });
@@ -224,8 +224,15 @@ exports.addTemperatureLog = async (req, res) => {
       return res.status(404).json({ success: false, error: 'Batch not found' });
     }
 
-    // Mathematically lock randomly generated float between 2.0 and 12.0
-    const tempValue = parseFloat((Math.random() * 10 + 2).toFixed(1));
+    // Use real hardware reading if provided (ESP32), otherwise simulate
+    const hardwareTemp = req.body && req.body.temperature !== undefined
+      ? parseFloat(req.body.temperature)
+      : null;
+
+    const isHardware = hardwareTemp !== null && !isNaN(hardwareTemp);
+    const tempValue = isHardware
+      ? parseFloat(hardwareTemp.toFixed(1))
+      : parseFloat((Math.random() * 10 + 2).toFixed(1)); // simulator fallback
 
     batch.temperatureLogs.push({
       value: tempValue,
