@@ -88,7 +88,7 @@ void loop() {
   sensors.requestTemperatures();
   float tempC = sensors.getTempCByIndex(0);
 
-  if (tempC == DEVICE_DISCONNECTED_C) {
+  if (tempC == -127.0 || tempC == 85.0) {
     Serial.println("[ERROR] Sensor disconnected or not detected on GPIO " + String(ONE_WIRE_PIN));
     Serial.println("        Check wiring: + → 3.3V,  OUT → GPIO4,  - → GND");
     delay(SEND_INTERVAL_MS);
