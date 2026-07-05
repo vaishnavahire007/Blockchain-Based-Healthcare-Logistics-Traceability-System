@@ -166,9 +166,9 @@ https://blockchain-based-healthcare-logistics.onrender.com/register
 
 ## 👨‍💻 Developed By
 
-**Vaishnav Ahire**  
-**Vicky Waghmare** 
-**Vedant Dagade** 
+**Vaishnav Ahire**
+**Vicky Waghmare**
+**Vedant Dagade**
 Bachelor of Engineering (Electronics & Telecommunication)
 
 Final Year Project
