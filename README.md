@@ -32,7 +32,6 @@
 - [Getting Started](#getting-started)
 - [Environment Variables](#environment-variables)
 - [Deployment](#deployment)
-- [Screenshots](#screenshots)
 
 ---
 
@@ -418,7 +417,7 @@ ETHERSCAN_API_KEY=YOUR_ETHERSCAN_KEY
 
 | Service | URL |
 |---|---|
-| Backend (Render) | `https://blockchain-based-healthcare-logistics.onrender.com` |
+| Backend (Render) | https://blockchain-based-healthcare-logistics.onrender.com/register |
 
 ---
 
