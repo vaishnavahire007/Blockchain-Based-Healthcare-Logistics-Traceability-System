@@ -1,0 +1,12 @@
+# Blockchain artefacts (auto-generated — do not commit)
+node_modules/
+artifacts/
+cache/
+deployments/localhost/
+coverage/
+coverage.json
+typechain-types/
+
+# Secrets
+.env
+*.env

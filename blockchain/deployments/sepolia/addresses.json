@@ -1,0 +1,9 @@
+{
+  "network": "sepolia",
+  "chainId": "11155111",
+  "deployedAt": "2024-11-14T08:32:10.421Z",
+  "deployer": "0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db",
+  "RoleManager":      "0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2",
+  "AlertSystem":      "0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB",
+  "MedicineTracking": "0x617F2E2fD72FD9D5503197092aC168c91465E7f2"
+}
